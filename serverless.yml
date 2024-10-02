@@ -1,0 +1,42 @@
+service: pricing-automation-service
+
+provider:
+  name: aws
+  runtime: python3.11
+  environment:
+    PYTHONPATH: ./lambda_function
+    
+    # Environment variables for NetSuite credentials
+    NETSUITE_ACCOUNT_ID: ${env:NETSUITE_ACCOUNT_ID}
+    NETSUITE_CONSUMER_KEY: ${env:NETSUITE_CONSUMER_KEY}
+    NETSUITE_CONSUMER_SECRET: ${env:NETSUITE_CONSUMER_SECRET}
+    NETSUITE_TOKEN_ID: ${env:NETSUITE_TOKEN_ID}
+    NETSUITE_TOKEN_SECRET: ${env:NETSUITE_TOKEN_SECRET}
+
+    # Environment variables for Shopify integration
+    SHOPIFY_API_KEY: ${env:SHOPIFY_API_KEY}
+    SHOPIFY_API_SECRET: ${env:SHOPIFY_API_SECRET}
+    STORE_NAME: ${env:STORE_NAME}
+
+    # Environment variables for Zoey integration
+    ZOEY_API_URL: ${env:ZOEY_API_URL}
+    ZOEY_CLIENT_ID: ${env:ZOEY_CLIENT_ID}
+    ZOEY_CLIENT_SECRET: ${env:ZOEY_CLIENT_SECRET}
+    ZOEY_ACCESS_TOKEN: ${env:ZOEY_ACCESS_TOKEN}
+
+plugins:
+  - serverless-offline
+
+functions:
+  updatePrice:
+    handler: lambda_function.main.lambda_handler
+    events:
+      - http:
+          path: update-price
+          method: post
+
+custom:
+  serverless-offline:
+    httpPort: 3003    
+    lambdaPort: 3004    
+    websocketPort: 3005

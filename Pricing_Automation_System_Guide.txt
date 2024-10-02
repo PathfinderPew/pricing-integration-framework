@@ -1,0 +1,99 @@
+# Pricing Automation System Guide
+
+## Overview
+This is a simple guide to help you set up and use the pricing automation system. It’s designed to update Shopify product prices automatically based on competitor prices.
+
+## Setting Up the Pricing System with AWS Lambda
+
+1. **Get Your Code Ready**:
+   - Make sure your project folder looks like this:
+     ```
+     HFPB2C/
+     ├── lambda_function/
+     │   ├── __init__.py        # Empty file, just to make sure Python treats this folder as a package
+     │   ├── main.py            # The Lambda function code
+     │   ├── shopify_api.py     # Code for interacting with Shopify’s API
+     ├── mock_data.py           # For testing with fake product data
+     └── serverless.yml         # Configuration for the Serverless framework
+     ```
+   - Instal any needed libraries (like `requests`) into the `lambda_function` folder:
+     ```bash
+     pip install requests -t lambda_function/
+     ```
+
+2. **Package It Up**:
+   - Once everything is in the right place, zip up the `lambda_function` folder:
+     ```bash
+     cd HFPB2C
+     zip -r lambda_function.zip lambda_function/
+     ```
+
+3. **Upload to AWS Lambda**:
+   - Go to the AWS Lambda Console.
+   - Choose **Create Function** or pick an existing one.
+   - In the Function code section, upload your `lambda_function.zip`.
+
+4. **Set Your API Credentials**:
+   - In the AWS Lambda Console, set up environment variables for your Shopify API credentials:
+     - `API_KEY`: Your Shopify API Key
+     - `API_SECRET`: Your Shopify API Secret
+     - `STORE_NAME`: Your Shopify store name (e.g., `myshop`)
+
+5. **Configure the Function**:
+   - Set the runtime to Python 3.11 (or the version you're using).
+   - Make sure your Lambda function has permission to use CloudWatch (for logging) and any other AWS services you need.
+
+6. **Test Locally Using Serverless Offline**:
+   - You can run and test the function on your own machine using Serverless Offline. Start it up with:
+     ```bash
+     serverless offline
+     ```
+   - Once it’s running, trigger the function using something like `curl` or PowerShell:
+     ```bash
+     Invoke-RestMethod -Uri http://localhost:3003/dev/update-price -Method Post -Headers @{ "Content-Type" = "application/json" } -Body '{"use_mock_data": true}'
+     ```
+
+## How It Works
+
+1. **Fetching Product Info**:
+   - The system grabs product details from Shopify using the Shopify API. When test locally, you can use mock data.
+
+2. **Competitor Price Checking**:
+   - It checks competitor prices using the `fetch_competitor_prices()` function (right now it’s a mock function, but you can replace it with real price scraping later).
+
+3. **Updating Prices**:
+   - If the competitor’s price is lower than what’s in Shopify, the system updates the Shopify price automatically.
+
+4. **Running the Function**:
+   - You can trigger it manually through API calls or set it up to run automatically on a schedule using AWS CloudWatch Events.
+
+## What You Can Do Next
+
+1. **Get Real Competitor Prices**:
+   - Swap out the `fetch_competitor_prices()` function with actual web scraping or a price comparison API.
+
+2. **Advanced Pricing**:
+   - Add more advanced pricing rules, like adjusting based on sales data, time of year, or even predictions using machine learning.
+
+3. **Create a Dashboard**:
+   - Build a dashboard with AWS QuickSight or Power BI so you can visualize competitor prices versus your own.
+
+4. **Error Handling**:
+   - Make sure errors are logged properly in CloudWatch so you can monitor when things go wrong.
+
+5. **Expand to Other Platforms**:
+   - If you sell on other platforms, extend the system to handle their pricing APIs too.
+
+## Documentation
+
+### Technical Details:
+- **get_products()**: Fetches product data from Shopify (or mock data when testing).
+- **print_products()**: Prints product info for debugging.
+- **update_product_price(product_id, variant_id, new_price)**: Updates a product’s price on Shopify.
+- **fetch_competitor_prices()**: Returns mock competitor prices (you’ll want to replace this with real data).
+- **compare_and_update_prices()**: Compares Shopify prices with competitor prices and updates them if needed.
+
+### For Non-Techies:
+- **Setting it up**: Once everything is set up on AWS Lambda, all you have to do is provide your Shopify credentials and let the system handle price updates.
+- **Monitoring**: You can view the logs in AWS CloudWatch to check if everything’s running smoothly.
+"""
