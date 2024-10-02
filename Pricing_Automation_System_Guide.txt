@@ -1,99 +1,127 @@
-# Pricing Automation System Guide
+Pricing Automation System Guide
 
-## Overview
-This is a simple guide to help you set up and use the pricing automation system. It’s designed to update Shopify product prices automatically based on competitor prices.
+Overview
 
-## Setting Up the Pricing System with AWS Lambda
+This guide explains how to set up and use the pricing automation system, which updates product prices automatically across Shopify, NetSuite, and Zoey based on competitor prices.
 
-1. **Get Your Code Ready**:
-   - Make sure your project folder looks like this:
-     ```
-     HFPB2C/
-     ├── lambda_function/
-     │   ├── __init__.py        # Empty file, just to make sure Python treats this folder as a package
-     │   ├── main.py            # The Lambda function code
-     │   ├── shopify_api.py     # Code for interacting with Shopify’s API
-     ├── mock_data.py           # For testing with fake product data
-     └── serverless.yml         # Configuration for the Serverless framework
-     ```
-   - Instal any needed libraries (like `requests`) into the `lambda_function` folder:
-     ```bash
-     pip install requests -t lambda_function/
-     ```
+Setting Up the Pricing System with AWS Lambda
 
-2. **Package It Up**:
-   - Once everything is in the right place, zip up the `lambda_function` folder:
-     ```bash
-     cd HFPB2C
-     zip -r lambda_function.zip lambda_function/
-     ```
+1. Get Your Code Ready:
+   
+   Ensure your project folder structure is organized like this:
+   
+   HFPB2C/
+   ├── lambda_function/
+   │   ├── __init__.py        (Empty file to define this folder as a package)
+   │   ├── main.py            (The Lambda function code)
+   │   ├── shopify_api.py     (Code for interacting with Shopify’s API)
+   │   ├── netsuite_api.py    (Code for interacting with NetSuite’s API)
+   │   ├── zoey_api.py        (Code for interacting with Zoey’s API)
+   ├── mock_data.py           (For testing with mock product data)
+   └── serverless.yml         (Configuration file for the Serverless framework)
 
-3. **Upload to AWS Lambda**:
-   - Go to the AWS Lambda Console.
-   - Choose **Create Function** or pick an existing one.
-   - In the Function code section, upload your `lambda_function.zip`.
+   Install any needed libraries (like `requests`) into the `lambda_function` folder:
 
-4. **Set Your API Credentials**:
-   - In the AWS Lambda Console, set up environment variables for your Shopify API credentials:
-     - `API_KEY`: Your Shopify API Key
-     - `API_SECRET`: Your Shopify API Secret
-     - `STORE_NAME`: Your Shopify store name (e.g., `myshop`)
+   pip install requests -t lambda_function/
 
-5. **Configure the Function**:
-   - Set the runtime to Python 3.11 (or the version you're using).
-   - Make sure your Lambda function has permission to use CloudWatch (for logging) and any other AWS services you need.
+2. Package It Up:
 
-6. **Test Locally Using Serverless Offline**:
-   - You can run and test the function on your own machine using Serverless Offline. Start it up with:
-     ```bash
-     serverless offline
-     ```
-   - Once it’s running, trigger the function using something like `curl` or PowerShell:
-     ```bash
-     Invoke-RestMethod -Uri http://localhost:3003/dev/update-price -Method Post -Headers @{ "Content-Type" = "application/json" } -Body '{"use_mock_data": true}'
-     ```
+   After ensuring everything is in place, zip up the `lambda_function` folder:
 
-## How It Works
+   cd HFPB2C
+   zip -r lambda_function.zip lambda_function/
 
-1. **Fetching Product Info**:
-   - The system grabs product details from Shopify using the Shopify API. When test locally, you can use mock data.
+3. Upload to AWS Lambda:
 
-2. **Competitor Price Checking**:
-   - It checks competitor prices using the `fetch_competitor_prices()` function (right now it’s a mock function, but you can replace it with real price scraping later).
+   Open the AWS Lambda Console. Choose to create a new function or select an existing one. In the Function code section, upload your `lambda_function.zip` file.
 
-3. **Updating Prices**:
-   - If the competitor’s price is lower than what’s in Shopify, the system updates the Shopify price automatically.
+4. Set Your API Credentials:
 
-4. **Running the Function**:
-   - You can trigger it manually through API calls or set it up to run automatically on a schedule using AWS CloudWatch Events.
+   In the AWS Lambda Console, configure the following environment variables for each platform:
+   
+   Shopify:
+   - API_KEY: Your Shopify API Key
+   - API_SECRET: Your Shopify API Secret
+   - STORE_NAME: Your Shopify store name (e.g., `myshop`)
 
-## What You Can Do Next
+   NetSuite:
+   - NETSUITE_ACCOUNT_ID: Your NetSuite Account ID
+   - NETSUITE_CONSUMER_KEY: Your NetSuite Consumer Key
+   - NETSUITE_CONSUMER_SECRET: Your NetSuite Consumer Secret
+   - NETSUITE_TOKEN_ID: Your NetSuite Token ID
+   - NETSUITE_TOKEN_SECRET: Your NetSuite Token Secret
 
-1. **Get Real Competitor Prices**:
-   - Swap out the `fetch_competitor_prices()` function with actual web scraping or a price comparison API.
+   Zoey:
+   - ZOEY_API_URL: Zoey’s API Base URL
+   - ZOEY_CLIENT_ID: Your Zoey Client ID
+   - ZOEY_CLIENT_SECRET: Your Zoey Client Secret
+   - ZOEY_ACCESS_TOKEN: Zoey Access Token for API calls
 
-2. **Advanced Pricing**:
-   - Add more advanced pricing rules, like adjusting based on sales data, time of year, or even predictions using machine learning.
+5. Configure the Function:
 
-3. **Create a Dashboard**:
-   - Build a dashboard with AWS QuickSight or Power BI so you can visualize competitor prices versus your own.
+   Set the runtime to Python 3.11 (or whichever version you're using). Ensure your Lambda function has permission to access CloudWatch for logging and any other AWS services it requires.
 
-4. **Error Handling**:
-   - Make sure errors are logged properly in CloudWatch so you can monitor when things go wrong.
+6. Test Locally Using Serverless Offline:
 
-5. **Expand to Other Platforms**:
-   - If you sell on other platforms, extend the system to handle their pricing APIs too.
+   Start the Serverless Offline plugin on your machine for local testing:
 
-## Documentation
+   serverless offline
 
-### Technical Details:
-- **get_products()**: Fetches product data from Shopify (or mock data when testing).
-- **print_products()**: Prints product info for debugging.
-- **update_product_price(product_id, variant_id, new_price)**: Updates a product’s price on Shopify.
-- **fetch_competitor_prices()**: Returns mock competitor prices (you’ll want to replace this with real data).
-- **compare_and_update_prices()**: Compares Shopify prices with competitor prices and updates them if needed.
+   Once it’s running, you can trigger the function using curl or PowerShell:
 
-### For Non-Techies:
-- **Setting it up**: Once everything is set up on AWS Lambda, all you have to do is provide your Shopify credentials and let the system handle price updates.
-- **Monitoring**: You can view the logs in AWS CloudWatch to check if everything’s running smoothly.
-"""
+   Invoke-RestMethod -Uri http://localhost:3003/dev/update-price -Method Post -Headers @{ "Content-Type" = "application/json" } -Body '{"use_mock_data": true, "platform": "shopify"}'
+
+How It Works
+
+1. Fetching Product Info:
+
+   The system pulls product details from Shopify, NetSuite, and Zoey using the respective APIs. For local testing, you can use mock data.
+
+2. Competitor Price Checking:
+
+   The framework checks competitor prices using the `fetch_competitor_prices()` function, which is currently a mock function. This can be replaced with real scraping logic.
+
+3. Updating Prices:
+
+   If the competitor’s price is lower than the current price, the system automatically updates the prices on Shopify, NetSuite, and Zoey.
+
+4. Running the Function:
+
+   The function can be triggered manually through API calls or set to run on a schedule using AWS CloudWatch Events.
+
+What You Can Do Next
+
+1. Get Real Competitor Prices:
+
+   Replace the `fetch_competitor_prices()` function with real web scraping or a price comparison API.
+
+2. Advanced Pricing:
+
+   Implement more complex pricing rules, such as adjustments based on sales trends, time of year, or predictive modeling.
+
+3. Create a Dashboard:
+
+   Visualize competitor and product prices using AWS QuickSight, Power BI, or another dashboard solution.
+
+4. Error Handling:
+
+   Ensure that errors are logged properly in CloudWatch so you can monitor and debug issues.
+
+5. Expand to Other Platforms:
+
+   Extend the framework to handle price updates for additional platforms, or add new APIs to integrate with.
+
+Documentation
+
+Technical Details:
+
+- get_products: Retrieves product data from Shopify, NetSuite, or Zoey based on the platform parameter.
+- print_products: Outputs product details for debugging.
+- update_product_price(product_id, variant_id, new_price): Updates a product’s price on Shopify, NetSuite, or Zoey.
+- fetch_competitor_prices: Returns mock competitor prices (should be replaced with real data).
+- compare_and_update_prices: Compares current platform prices with competitor prices and updates them as needed.
+
+For Non-Techies:
+
+- Setting It Up: Once configured on AWS Lambda, provide your Shopify, NetSuite, and Zoey credentials, and the system will automatically handle price updates.
+- Monitoring: Use AWS CloudWatch to check logs and ensure the system is running correctly.
